@@ -2,12 +2,14 @@
 
 import json
 import os
-from utils import create_project_id, create_task_id, create_subtask_id
 from subtask import Subtask
 from task import Task
 from project import Project
 
-DATA_FILE = "projects.json"
+# DATA_FILE = "projects.json"
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_FILE = os.path.join(BASE_DIR, 'projects.json')
 
 def load_projects():
     if not os.path.exists(DATA_FILE):

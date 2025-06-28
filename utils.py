@@ -1,11 +1,14 @@
 import uuid
-
+import click
 def ask_yes_no(prompt="Confirm (y/n): "):
     while True:
-        choice = input(prompt).strip().lower()
+        choice = click.prompt(prompt).strip().lower()
         if choice in ['y', 'n']:
-            return choice
-        print("Please enter 'y' or 'n'.")
+            if choice == 'y':
+                return True
+            else:
+                return False
+        click.echo("Please enter 'y' or 'n'.")
 
 
 def create_project_id():
@@ -16,3 +19,4 @@ def create_task_id():
 
 def create_subtask_id():
     return f"sub_{uuid.uuid4().hex[:6]}"
+

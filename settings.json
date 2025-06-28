@@ -1,0 +1,4 @@
+{
+  "allowed_priorities": ["low", "medium", "high", "urgent"],
+  "allowed_statuses": ["to-do", "in-progress", "done", "incomplete"]
+}

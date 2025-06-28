@@ -39,7 +39,7 @@
     {
       "id": "proj_de0cfc",
       "name": "Test Project",
-      "description": "Brief project description",
+      "description": "Newest version of the the description",
       "tasks": [
         {
           "id": "task_0c4c34",
@@ -47,6 +47,26 @@
           "description": "Testing out the task addition function",
           "due_by": null,
           "status": "incomplete",
+          "priority": "medium",
+          "project_id": "proj_de0cfc",
+          "subtasks": [
+            {
+              "id": "sub_febdf2",
+              "label": "Subtask 1",
+              "description": "Test adding new subtask to task.",
+              "estimate": ".25h",
+              "status": "to-do",
+              "priority": "low",
+              "task_id": "task_0c4c34"
+            }
+          ]
+        },
+        {
+          "id": "task_133a47",
+          "label": "Edited Test Task 2",
+          "description": "Test the edit task function",
+          "due_by": "28-06-2025",
+          "status": "to-do",
           "priority": "medium",
           "project_id": "proj_de0cfc",
           "subtasks": []

@@ -1,8 +1,6 @@
-ALLOWED_PRIORITIES = {"low", "medium", "high", "urgent"}
-ALLOWED_STATUSES = {"to-do", "in-progress", "done", "incomplete"}
-
+from settings import ALLOWED_PRIORITIES, ALLOWED_STATUSES
 class Subtask:
-    def __init__(self, id, label, description, due_by, estimate, status="to-do", priority="medium", task_id=None):
+    def __init__(self, id, label, description, estimate, status="to-do", priority="medium", task_id=None):
         if priority not in ALLOWED_PRIORITIES:
             raise ValueError(f"Invalid priority '{priority}'. Must be one of {ALLOWED_PRIORITIES}")
         if status not in ALLOWED_STATUSES:
@@ -10,7 +8,6 @@ class Subtask:
         self.id = id
         self.label = label
         self.description = description
-        self.due_by = due_by
         self.estimate = estimate
         self.status = status
         self.priority = priority
@@ -21,7 +18,6 @@ class Subtask:
             "id": self.id,
             "label": self.label,
             "description": self.description,
-            "due_by": self.due_by,
             "estimate": self.estimate,
             "status": self.status,
             "priority": self.priority,
@@ -34,7 +30,6 @@ class Subtask:
             id=data["id"],
             label=data["label"],
             description=data["description", ""],
-            due_by=data["due_by", ""],
             estimate=data["estimate", ""],
             status=data.get("status", "to-do"),
             priority=data.get("priority", "medium"),

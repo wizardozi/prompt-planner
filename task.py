@@ -1,6 +1,5 @@
 from subtask import Subtask
-ALLOWED_PRIORITIES = {"low", "medium", "high", "urgent"}
-ALLOWED_STATUSES = {"to-do", "in-progress", "done", "incomplete"}
+from settings import ALLOWED_PRIORITIES, ALLOWED_STATUSES
 
 class Task:
     def __init__(self, id, label, description, due_by, status="incomplete", priority="medium", project_id=None, subtasks=None, ):
