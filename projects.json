@@ -1,0 +1,57 @@
+{
+  "projects": [
+    {
+      "id": "proj_001",
+      "name": "AI Assistant App",
+      "description": "Planning and building the AI-powered task planner.",
+      "tasks": [
+        {
+          "id": "task_001",
+          "label": "Integrate AI command handler",
+          "description": "Enable AI to output structured JSON commands",
+          "due_by": "2025-06-29",
+          "status": "incomplete",
+          "priority": "high",
+          "project_id": "proj_001",
+          "subtasks": [
+            {
+              "id": "sub_001",
+              "label": "Design prompt format",
+              "description": "Description of the subtask",
+              "estimate": "2h",
+              "status": "to-do",
+              "priority": "medium",
+              "task_id": "task_001"
+            },
+            {
+              "id": "sub_002",
+              "label": "Test command routing logic",
+              "description": "Description of the subtask",
+              "estimate": "1h",
+              "status": "to-do",
+              "priority": "low",
+              "task_id": "task_001"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "proj_de0cfc",
+      "name": "Test Project",
+      "description": "Brief project description",
+      "tasks": [
+        {
+          "id": "task_0c4c34",
+          "label": "New Test Task",
+          "description": "Testing out the task addition function",
+          "due_by": null,
+          "status": "incomplete",
+          "priority": "medium",
+          "project_id": "proj_de0cfc",
+          "subtasks": []
+        }
+      ]
+    }
+  ]
+}
