@@ -5,12 +5,15 @@ from storage import load_projects, save_projects
 from subtask import Subtask
 from task import Task
 from project import Project
+from datetime import datetime, timedelta
+from helper import prompt_estimate_rounded, parse_time_estimate
+
 
 @click.group
 def myCommands():
     pass
 
-@click.command()
+@myCommands.command()
 @click.option('--name', prompt='Name', help='Write a project name.')
 @click.option('--desc', prompt='Description', help='Write a project description.')
 def add_project(name, desc):
@@ -25,7 +28,7 @@ def add_project(name, desc):
     save_projects(all_projects)
     click.echo(f"New project name: {name}")
 
-@click.command()
+@myCommands.command()
 def add_task():
     projects = load_projects()
     if not projects:
@@ -57,7 +60,7 @@ def add_task():
     save_projects(projects)
     click.echo(f"Added task to project: {selected_project['name']}")
 
-@click.command()
+@myCommands.command()
 def add_subtask():
     projects = load_projects()
     # Print project names with indexes
@@ -79,7 +82,7 @@ def add_subtask():
 
     label = click.prompt("Subtask label")
     description = click.prompt("Subtask description")
-    estimate = click.prompt("Subtask time estimata")
+    estimate = prompt_estimate_rounded()
     for idx, p in enumerate(ALLOWED_PRIORITIES):
         click.echo(f"{idx + 1}. {p}")
     selected_idx = click.prompt('Select task priorty by number', type=int) - 1
@@ -98,7 +101,7 @@ def add_subtask():
     save_projects(projects)
     click.echo(f"Added subtask to task: {selected_task['label']}")
 
-@click.command()
+@myCommands.command()
 def edit_project():
     projects = load_projects()
     if not projects:
@@ -115,7 +118,7 @@ def edit_project():
 
     save_projects(projects)
 
-@click.command()
+@myCommands.command()
 def edit_task():
     projects = load_projects()
     if not projects:
@@ -148,8 +151,7 @@ def edit_task():
     )
     save_projects(projects)
 
-
-@click.command()
+@myCommands.command()
 def edit_subtask():
     projects = load_projects()
     if not projects:
@@ -178,9 +180,27 @@ def edit_subtask():
     subtask = subtasks[s_idx]
 
     click.echo("Press enter to keep current value")
-    subtask["label"] = click.prompt("Edit label", default=subtask["label"])
-    subtask["description"] = click.prompt("Edit description", default=subtask["description"])
-    subtask["estimate"] = click.prompt("Edit time estimate", default=subtask["estimate"])
+    subtask["label"] = click.prompt(
+        "Edit label",
+        default=subtask["label"]
+    )
+    subtask["description"] = click.prompt(
+        "Edit description",
+        default=subtask["description"]
+    )
+    estimate_input = click.prompt(
+        "Edit time estimate (e.g., 1.5, 90m, 1h, 1:15)",
+        default="",
+        show_default=False
+    )
+    if estimate_input.strip():
+        try:
+            subtask["estimate"] = str(parse_time_estimate(estimate_input.strip()))
+        except ValueError:
+            click.echo("Invalid time format. Estimate unchanged.")
+    else:
+        click.echo("Estimate unchanged.")
+
     subtask["status"] = click.prompt(
         "Edit status",
         type=click.Choice(ALLOWED_STATUSES, case_sensitive=False),
@@ -193,8 +213,7 @@ def edit_subtask():
     )
     save_projects(projects)
 
-
-@click.command()
+@myCommands.command()
 def delete_project():
     projects = load_projects()
     if not projects:
@@ -211,7 +230,7 @@ def delete_project():
         save_projects(projects)
         click.echo("Project deleted.")
 
-@click.command()
+@myCommands.command()
 def delete_task():
     projects = load_projects()
     if not projects:
@@ -238,7 +257,7 @@ def delete_task():
         save_projects(projects)
         click.echo("Task deleted.")
 
-@click.command()
+@myCommands.command()
 def delete_subtask():
     projects = load_projects()
     if not projects:
@@ -271,26 +290,111 @@ def delete_subtask():
         save_projects(projects)
         click.echo("Subtask deleted.")
 
-@click.command()
+@myCommands.command()
 def show_projects():
     projects = load_projects()
     # Print project names with indexes
     for idx, proj in enumerate(projects):
         click.echo(f"{idx + 1}. {proj['name']}")
 
-myCommands.add_command(add_project)
-myCommands.add_command(add_task)
-myCommands.add_command(add_subtask)
+@myCommands.command()
+def move_task():
+    projects = load_projects()
+    if not projects:
+        click.echo("No projects found.")
+        return
 
-myCommands.add_command(edit_project)
-myCommands.add_command(edit_task)
-myCommands.add_command(edit_subtask)
+    # Select source project
+    for idx, proj in enumerate(projects):
+        click.echo(f"{idx + 1}. {proj['name']}")
+    src_proj_idx = click.prompt("Select source project by number", type=int) - 1
+    src_project = projects[src_proj_idx]
 
-myCommands.add_command(delete_project)
-myCommands.add_command(delete_task)
-myCommands.add_command(delete_subtask)
+    if not src_project['tasks']:
+        click.echo("No tasks found in this project.")
+        return
 
-myCommands.add_command(show_projects)
+    # Select task to move
+    for idx, task in enumerate(src_project['tasks']):
+        click.echo(f"{idx + 1}. {task['label']}")
+    task_idx = click.prompt("Select task to move by number", type=int) - 1
+    task = src_project['tasks'].pop(task_idx)
+
+    # Select destination project
+    for idx, proj in enumerate(projects):
+        click.echo(f"{idx + 1}. {proj['name']}")
+    dest_proj_idx = click.prompt("Select destination project by number", type=int) - 1
+    dest_project = projects[dest_proj_idx]
+
+    # Update task's project_id and move it
+    task['project_id'] = dest_project['id']
+    dest_project['tasks'].append(task)
+
+    save_projects(projects)
+    click.echo(f"Moved task '{task['label']}' to project '{dest_project['name']}'.")
+
+@myCommands.command()
+@click.option(
+    "--view",
+    type=click.Choice(["today", "week", "range"], case_sensitive=False),
+    prompt="View tasks for",
+    help="Choose a time filter: today, week, or range."
+)
+def show_tasks(view):
+    projects = load_projects()
+    now = datetime.now()
+
+    if view == "today":
+        target_date = now.date()
+        click.echo("Tasks due today:")
+    elif view == "week":
+        start = now.date()
+        end = (now + timedelta(days=7)).date()
+        click.echo("Tasks due this week:")
+    elif view == "range":
+        start_str = click.prompt("Start date (DD-MM-YYYY)")
+        end_str = click.prompt("End date (DD-MM-YYYY)")
+        try:
+            start = datetime.strptime(start_str, "%d-%m-%Y").date()
+            end = datetime.strptime(end_str, "%d-%m-%Y").date()
+        except ValueError:
+            click.echo("Invalid date format. Use DD-MM-YYYY.")
+            return
+        click.echo(f"Tasks due from {start_str} to {end_str}:")
+
+    for proj in projects:
+        for task in proj["tasks"]:
+            due_str = task.get("due_by")
+            if due_str:
+                try:
+                    due_date = datetime.strptime(due_str, "%d-%m-%Y").date()
+                except ValueError:
+                    continue  # skip tasks with invalid date format
+                show = False
+                if view == "today":
+                    show = due_date == now.date()
+                elif view == "week":
+                    show = start <= due_date <= end
+                elif view == "range":
+                    show = start <= due_date <= end
+                if show:
+                    total_estimate = 0
+                    for subtask in task["subtasks"]:
+                        if subtask["status"] != "done":
+                            total_estimate += float(subtask["estimate"])
+
+                    click.echo(f"- [{task['status']}] {task['label']} (Project: {proj['name']}) (Due: {due_date.strftime('%d-%m-%Y')}) (Estimate: {total_estimate}h)")
+                    click.echo(f"   {task['description']}\n")
+
+@myCommands.command()
+def done():
+    pass
+    # mark task or subtask as done
+
+@myCommands.command()
+def suggest():
+    pass
+    # return highest-priority actionable item
 
 if __name__ == '__main__':
     myCommands()
