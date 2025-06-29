@@ -1,9 +1,6 @@
 import click
 import re
 
-import click
-import re
-
 def parse_time_estimate(input_str):
     input_str = input_str.strip().lower()
 
