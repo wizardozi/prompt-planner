@@ -72,6 +72,42 @@
           "subtasks": []
         }
       ]
+    },
+    {
+      "id": "proj_dacca8",
+      "name": "Touch Typing practice",
+      "description": "Learning to touch type",
+      "tasks": [
+        {
+          "id": "task_6d58ac",
+          "label": "Keybr daily practice",
+          "description": "Use keybr to do my daily touch typing practice",
+          "due_by": null,
+          "status": "to-do",
+          "priority": "medium",
+          "project_id": "proj_dacca8",
+          "subtasks": [
+            {
+              "id": "sub_a6e82c",
+              "label": "Practice session",
+              "description": "Touch typing practice session",
+              "estimate": 0.5,
+              "status": "to-do",
+              "priority": "medium",
+              "task_id": "task_6d58ac"
+            },
+            {
+              "id": "sub_e2fb9e",
+              "label": "Sprint typing session",
+              "description": "Type as fast as possible for a short time",
+              "estimate": "0.08",
+              "status": "to-do",
+              "priority": "medium",
+              "task_id": "task_6d58ac"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
