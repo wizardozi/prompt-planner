@@ -1,3 +1,17 @@
 projects.json
 __pycache__/
 *.pyc
+# Ignore node_modules
+node_modules/
+
+# Ignore Electron build output
+*.log
+*.tmp
+.DS_Store
+*.asar
+*.local
+
+# Optional: Ignore system-specific files
+dist/
+build/
+Electron.app/
