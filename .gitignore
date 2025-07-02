@@ -16,3 +16,4 @@ dist/
 build/
 Electron.app/
 back-end/notes.txt
+back-end/.env
