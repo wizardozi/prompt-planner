@@ -400,11 +400,11 @@ def generate(project, task, subtask):
     if not project and not task and not subtask:
         click.echo("Please use one of the flags. 'planner generate --help'")
         return
-    # prompt = click.prompt('prompt')
-    prompt = "Build a time-tracking tool for freelancers. It should help users log billable hours by project and task, set priorities, and view weekly summaries. I would like to have this project done in the next month."
-    click.echo(f"[MOCK PROMPT] {prompt}")
+    prompt = click.prompt('prompt')
+    # prompt = "Build a time-tracking tool for freelancers. It should help users log billable hours by project and task, set priorities, and view weekly summaries. I would like to have this project done in the next month."
+    # click.echo(f"[MOCK PROMPT] {prompt}")
+    click.echo(f"{prompt}")
     if project:
-        # ai_generate_project(prompt)
         click.echo(ai_generate_project(prompt))
     else:
         projects = load_projects()

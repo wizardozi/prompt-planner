@@ -22,7 +22,6 @@ def render_prompt_from_file(file_path, context):
     return template.render(context)
 
 def ai_generate_project(prompt):
-    from settings import OPENAI_API_KEY
 
     client = OpenAI(api_key=OPENAI_API_KEY)
     rendered_prompt = render_prompt_from_file("prompts/project_prompt.txt", {"prompt": prompt})
@@ -36,15 +35,11 @@ def ai_generate_project(prompt):
         response_format={"type": "json_object"}
     )
 
-    return save_generated_project(response.choices[0].message.content)
+    # Save to disk — skip all return logic
+    save_generated_project(response.choices[0].message.content)
 
-# def ai_generate_project(prompt):
-# 	abs_path = os.path.join(os.path.dirname(__file__), "notes.json")
-# 	with open(abs_path) as f:
-# 		project = json.load(f)
-# 	return save_generated_project(json.dumps(project))
 
-def save_generated_project(response):
+def save_generated_project(response, use_jsonify=False):
     parsed = json.loads(response)
     if parsed["category"] not in PROJECT_CATEGORIES:
         parsed["category"] = "other"
@@ -87,10 +82,9 @@ def save_generated_project(response):
     projects = load_projects()
     projects.append(project.to_dict())
     save_projects(projects)
-    # return "✅ Project saved!"
+    return "✅ Project saved!"
     # return project
 
-    return jsonify({"project": project.to_dict()})
 
 def ai_generate_task(prompt, project):
      pass
