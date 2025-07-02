@@ -1,25 +1,45 @@
+// 👇 ADD THIS LINE FIRST
+require('electron-reload')(__dirname, {
+  electron: require(`${__dirname}/node_modules/electron`),
+});
+
 const { app, BrowserWindow } = require('electron');
+const path = require('path');
+const { spawn } = require('child_process');
+
+let pyProc = null;
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 1200,
+    width: 1000,
     height: 800,
     webPreferences: {
-      contextIsolation: false,
-      nodeIntegration: true,
+      nodeIntegration: false,
+      contextIsolation: true,
     },
   });
 
   win.loadURL('http://localhost:3000');
+  mainWindow.webContents.openDevTools({ mode: 'detach' });
 }
 
-app.whenReady().then(createWindow);
+function startPythonBackend() {
+  const script = path.join(__dirname, '../back-end/server.py');
+  pyProc = spawn('python3', [script]);
 
-// Quit when all windows are closed (except on macOS)
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
+  pyProc.stdout.on('data', (data) => {
+    console.log(`Python: ${data}`);
+  });
+  pyProc.stderr.on('data', (data) => {
+    console.error(`Python error: ${data}`);
+  });
+}
+
+app.whenReady().then(() => {
+  startPythonBackend();
+  createWindow();
 });
 
-app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) createWindow();
+app.on('will-quit', () => {
+  if (pyProc) pyProc.kill();
 });

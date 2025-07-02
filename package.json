@@ -2,9 +2,13 @@
   "main": "main.js",
   "scripts": {
     "start": "cd front-end && npm start",
-    "electron": "electron ."
+    "electron": "electron .",
+    "dev": "concurrently \"./back-end/.venv/bin/python3 back-end/server.py\" \"cd front-end && npm start\" \"wait-on http://localhost:3000 && electron .\""
   },
   "devDependencies": {
-    "electron": "^37.1.0"
+    "concurrently": "^9.2.0",
+    "electron": "^37.1.0",
+    "electron-reload": "^2.0.0-alpha.1",
+    "wait-on": "^8.0.3"
   }
 }

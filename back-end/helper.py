@@ -27,15 +27,6 @@ def parse_time_estimate(input_str):
         raise ValueError("Invalid time format. Use '1h', '90m', or '1.5'.")
 
 def prompt_estimate_rounded():
-    raw = click.prompt("Enter time estimate (e.g., 1h, 30m, 0.25)")
-    try:
-        parsed = parse_time_estimate(raw)
-        rounded = round(parsed * 4) / 4  # round to nearest 0.25
-        return rounded
-    except ValueError:
-        click.echo("Invalid time format. Use '1h', '30m', or '0.25'")
-        return prompt_estimate_rounded()
-def prompt_estimate_rounded():
     raw = click.prompt("Enter time estimate (e.g., 1.5 or 90m or 1:15)")
     try:
         parsed = parse_time_estimate(raw)

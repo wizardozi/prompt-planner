@@ -15,3 +15,4 @@ node_modules/
 dist/
 build/
 Electron.app/
+back-end/notes.txt

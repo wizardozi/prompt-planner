@@ -2,7 +2,7 @@ from yaspin import yaspin
 # from ai_engine import generate_project_response
 # from parser import parse_response_to_project
 # from storage import save_project
-from cli import myCommands
+from cli import cli
 
 def display_tasks(structured):
     for section in structured:
@@ -28,5 +28,5 @@ def main():
     # display_tasks(response)
 
 if __name__ == "__main__":
-    myCommands()
+    cli()
     # main()

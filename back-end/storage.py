@@ -10,6 +10,7 @@ from project import Project
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(BASE_DIR, 'projects.json')
+SETTINGS_FILE = os.path.join(BASE_DIR, 'settings.json')
 
 def load_projects():
     if not os.path.exists(DATA_FILE):
@@ -21,6 +22,17 @@ def load_projects():
 def save_projects(projects):
     with open(DATA_FILE, "w") as f:
         json.dump({"projects": projects}, f, indent=2)
+
+def load_categories():
+    if not os.path.exists(SETTINGS_FILE):
+        return []
+    with open(SETTINGS_FILE, "r") as f:
+        data = json.load(f)
+        return data.get("project_categories", [])
+
+def save_categories(category):
+    with open(SETTINGS_FILE, "w") as f:
+        json.dump({"project_categories": category}, f, indent=2)
 
 def save_tasks(tasks):
     """Save task data to the JSON file."""

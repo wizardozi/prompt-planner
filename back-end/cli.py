@@ -1,34 +1,50 @@
 import click
 from utils import create_project_id, create_task_id, create_subtask_id, ask_yes_no
-from settings import ALLOWED_PRIORITIES, ALLOWED_STATUSES
-from storage import load_projects, save_projects
+from settings import ALLOWED_PRIORITIES, ALLOWED_STATUSES, PROJECT_CATEGORIES
+from storage import load_projects, save_projects, load_categories, save_categories
 from subtask import Subtask
 from task import Task
 from project import Project
 from datetime import datetime, timedelta
 from helper import prompt_estimate_rounded, parse_time_estimate
+from ai_engine import ai_generate_project, ai_generate_task, ai_generate_subtasks
 
 
 @click.group
-def myCommands():
+def cli():
     pass
 
-@myCommands.command()
+@cli.command()
 @click.option('--name', prompt='Name', help='Write a project name.')
-@click.option('--desc', prompt='Description', help='Write a project description.')
-def add_project(name, desc):
+@click.option('--description','--desc', prompt='Description', help='Write a project description.')
+def add_project(name, description):
+    categories = load_categories()
+    for idx, cat in enumerate(categories):
+        click.echo(f"{idx + 1}. {cat}")
+    selected_idx = click.prompt('Select a category by number or type a new one', type=str)
+
+    # Check if new category was typed
+    if selected_idx.isdigit():
+        category = categories[int(selected_idx) - 1]
+    else:
+        category = selected_idx
+        if category not in categories:
+            categories.append(category)
+            save_categories(categories)
+
     project = Project(
         id=create_project_id(),
         name=name,
-        description=desc,
+        description=description,
+        category=category,
         tasks=[]
     )
     all_projects = load_projects()
     all_projects.append(project.to_dict())
     save_projects(all_projects)
-    click.echo(f"New project name: {name}")
+    click.echo(f"New project name: {name}, Category: {category}")
 
-@myCommands.command()
+@cli.command()
 def add_task():
     projects = load_projects()
     if not projects:
@@ -60,7 +76,7 @@ def add_task():
     save_projects(projects)
     click.echo(f"Added task to project: {selected_project['name']}")
 
-@myCommands.command()
+@cli.command()
 def add_subtask():
     projects = load_projects()
     # Print project names with indexes
@@ -83,10 +99,6 @@ def add_subtask():
     label = click.prompt("Subtask label")
     description = click.prompt("Subtask description")
     estimate = prompt_estimate_rounded()
-    for idx, p in enumerate(ALLOWED_PRIORITIES):
-        click.echo(f"{idx + 1}. {p}")
-    selected_idx = click.prompt('Select task priorty by number', type=int) - 1
-    selected_priority = ALLOWED_PRIORITIES[selected_idx]
 
     subtask = Subtask(
         id=create_subtask_id(),
@@ -94,14 +106,13 @@ def add_subtask():
         description=description,
         estimate=estimate,
         status="to-do",
-        priority=selected_priority,
         task_id=selected_task['id']
     )
     selected_task['subtasks'].append(subtask.to_dict())
     save_projects(projects)
     click.echo(f"Added subtask to task: {selected_task['label']}")
 
-@myCommands.command()
+@cli.command()
 def edit_project():
     projects = load_projects()
     if not projects:
@@ -118,7 +129,7 @@ def edit_project():
 
     save_projects(projects)
 
-@myCommands.command()
+@cli.command()
 def edit_task():
     projects = load_projects()
     if not projects:
@@ -138,7 +149,7 @@ def edit_task():
     click.echo("Press enter to keep current value")
     task["label"] = click.prompt("Edit label", default=task["label"])
     task["description"] = click.prompt("Edit description", default=task["description"])
-    task["due_by"] = click.prompt("Edit due by date (DD-MM-YYYY)", default=task["due_by"])
+    task["due_by"] = click.prompt("Edit due by date (YYYY-MM-DD)", default=task["due_by"])
     task["status"] = click.prompt(
         "Edit status",
         type=click.Choice(ALLOWED_STATUSES, case_sensitive=False),
@@ -151,7 +162,7 @@ def edit_task():
     )
     save_projects(projects)
 
-@myCommands.command()
+@cli.command()
 def edit_subtask():
     projects = load_projects()
     if not projects:
@@ -206,14 +217,9 @@ def edit_subtask():
         type=click.Choice(ALLOWED_STATUSES, case_sensitive=False),
         default=subtask["status"]
     )
-    subtask["priority"] = click.prompt(
-        "Edit priority",
-        type=click.Choice(ALLOWED_PRIORITIES, case_sensitive=False),
-        default=subtask["priority"]
-    )
     save_projects(projects)
 
-@myCommands.command()
+@cli.command()
 def delete_project():
     projects = load_projects()
     if not projects:
@@ -230,7 +236,7 @@ def delete_project():
         save_projects(projects)
         click.echo("Project deleted.")
 
-@myCommands.command()
+@cli.command()
 def delete_task():
     projects = load_projects()
     if not projects:
@@ -257,7 +263,7 @@ def delete_task():
         save_projects(projects)
         click.echo("Task deleted.")
 
-@myCommands.command()
+@cli.command()
 def delete_subtask():
     projects = load_projects()
     if not projects:
@@ -290,14 +296,14 @@ def delete_subtask():
         save_projects(projects)
         click.echo("Subtask deleted.")
 
-@myCommands.command()
+@cli.command()
 def show_projects():
     projects = load_projects()
     # Print project names with indexes
     for idx, proj in enumerate(projects):
         click.echo(f"{idx + 1}. {proj['name']}")
 
-@myCommands.command()
+@cli.command()
 def move_task():
     projects = load_projects()
     if not projects:
@@ -333,7 +339,7 @@ def move_task():
     save_projects(projects)
     click.echo(f"Moved task '{task['label']}' to project '{dest_project['name']}'.")
 
-@myCommands.command()
+@cli.command()
 @click.option(
     "--view",
     type=click.Choice(["today", "week", "range"], case_sensitive=False),
@@ -352,22 +358,22 @@ def show_tasks(view):
         end = (now + timedelta(days=7)).date()
         click.echo("Tasks due this week:")
     elif view == "range":
-        start_str = click.prompt("Start date (DD-MM-YYYY)")
-        end_str = click.prompt("End date (DD-MM-YYYY)")
+        start_str = click.prompt("Start date (YYYY-MM-DD)")
+        end_str = click.prompt("End date (YYYY-MM-DD)")
         try:
-            start = datetime.strptime(start_str, "%d-%m-%Y").date()
-            end = datetime.strptime(end_str, "%d-%m-%Y").date()
+            start = datetime.strptime(start_str, "%Y-%m-%d").date()
+            end = datetime.strptime(end_str, "%Y-%m-%d").date()
         except ValueError:
-            click.echo("Invalid date format. Use DD-MM-YYYY.")
+            click.echo("Invalid date format. Use YYYY-MM-DD.")
             return
-        click.echo(f"Tasks due from {start_str} to {end_str}:")
+        click.echo(f"Tasks due from {start.strftime('%Y-%m-%d')} to {end.strftime('%Y-%m-%d')}:")
 
     for proj in projects:
         for task in proj["tasks"]:
             due_str = task.get("due_by")
             if due_str:
                 try:
-                    due_date = datetime.strptime(due_str, "%d-%m-%Y").date()
+                    due_date = datetime.strptime(due_str, "%Y-%m-%d").date()
                 except ValueError:
                     continue  # skip tasks with invalid date format
                 show = False
@@ -383,18 +389,49 @@ def show_tasks(view):
                         if subtask["status"] != "done":
                             total_estimate += float(subtask["estimate"])
 
-                    click.echo(f"- [{task['status']}] {task['label']} (Project: {proj['name']}) (Due: {due_date.strftime('%d-%m-%Y')}) (Estimate: {total_estimate}h)")
+                    click.echo(f"- [{task['status']}] {task['name']} (Project: {proj['name']}) (Due: {due_date.strftime('%Y-%m-%d')}) (Estimate: {total_estimate}h)")
                     click.echo(f"   {task['description']}\n")
+@cli.command()
+@click.option('--project', '--proj', is_flag=True, help="Generate a new Project with Tasks and Subtasks")
+@click.option('--task', is_flag=True, help="Generate Tasks for selected project")
+@click.option('--subtask', '--sub', is_flag=True, help="Generate Subtasks for selected Task")
+def generate(project, task, subtask):
+    # Generates a Project, Tasks or Subtasks from a prompt
+    if not project and not task and not subtask:
+        click.echo("Please use one of the flags. 'planner generate --help'")
+        return
+    # prompt = click.prompt('prompt')
+    prompt = "Build a time-tracking tool for freelancers. It should help users log billable hours by project and task, set priorities, and view weekly summaries. I would like to have this project done in the next month."
+    click.echo(f"[MOCK PROMPT] {prompt}")
+    if project:
+        # ai_generate_project(prompt)
+        click.echo(ai_generate_project(prompt))
+    else:
+        projects = load_projects()
+        # Print project names with indexes
+        for idx, proj in enumerate(projects):
+            click.echo(f"{idx + 1}. {proj['name']}")
+        selected_idx = click.prompt("Select project by number", type=int) - 1
+        selected_project = projects[selected_idx]
 
-@myCommands.command()
+        if task:
+            ai_generate_task(prompt, selected_project)
+        else:
+            tasks = selected_project["tasks"]
+            if not tasks:
+                click.echo("No tasks found. Please add a task first using 'planner add-task' or 'planner generate --task'.")
+                return
+            for idx, task in enumerate(tasks):
+                click.echo(f"{idx + 1}. {task['label']}")
+            selected_idx = click.prompt("Select task by number", type=int) - 1
+            selected_task = tasks[selected_idx]
+            ai_generate_subtasks(prompt, selected_task)
+
+@cli.command()
 def done():
     pass
     # mark task or subtask as done
 
-@myCommands.command()
-def suggest():
-    pass
-    # return highest-priority actionable item
 
 if __name__ == '__main__':
-    myCommands()
+    cli()

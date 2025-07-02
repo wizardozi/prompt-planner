@@ -2,13 +2,13 @@ from subtask import Subtask
 from settings import ALLOWED_PRIORITIES, ALLOWED_STATUSES
 
 class Task:
-    def __init__(self, id, label, description, due_by, status="incomplete", priority="medium", project_id=None, subtasks=None, ):
+    def __init__(self, id, name, description, due_by, status="to-do", priority="medium", project_id=None, subtasks=None, ):
         if priority not in ALLOWED_PRIORITIES:
             raise ValueError(f"Invalid priority '{priority}'. Must be one of {ALLOWED_PRIORITIES}")
         if status not in ALLOWED_STATUSES:
             raise ValueError(f"Invalid status '{status}'. Must be one of {ALLOWED_STATUSES}")
         self.id = id
-        self.label = label
+        self.name = name
         self.description = description
         self.due_by = due_by
         self.status = status
@@ -19,7 +19,7 @@ class Task:
     def to_dict(self):
         return {
             "id": self.id,
-            "label": self.label,
+            "name": self.name,
             "description": self.description,
             "due_by": self.due_by,
             "status": self.status,
@@ -32,7 +32,7 @@ class Task:
     def from_dict(data):
         return Task(
             id=data["id"],
-            label=data["label"],
+            name=data["name"],
             description=data["description", ""],
             due_by=data["due_by", ""],
             status=data.get("status", "incomplete"),

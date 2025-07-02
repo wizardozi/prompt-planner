@@ -9,3 +9,4 @@ with open(SETTINGS_FILE, "r") as f:
 
 ALLOWED_PRIORITIES = config.get("allowed_priorities", [])
 ALLOWED_STATUSES = config.get("allowed_statuses", [])
+PROJECT_CATEGORIES = config.get("project_categories", [])

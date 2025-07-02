@@ -1,4 +1,13 @@
 {
   "allowed_priorities": ["low", "medium", "high", "urgent"],
-  "allowed_statuses": ["to-do", "in-progress", "done", "incomplete"]
+  "allowed_statuses": ["to-do", "in-progress", "done", "incomplete"],
+  "project_categories": [
+    "Personal",
+    "Creative",
+    "Music",
+    "Client",
+    "Freelance",
+    "Learning",
+    "Other"
+  ]
 }

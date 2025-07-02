@@ -1,0 +1,9 @@
+Break the following task into 3–5 subtasks. Respond with only a JSON array of objects, where each object has this format:
+
+{
+  "name": string,
+  "status": "to-do"
+}
+
+Task:
+"{task_description}"
