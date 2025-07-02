@@ -39,7 +39,7 @@ def ai_generate_project(prompt):
     save_generated_project(response.choices[0].message.content)
 
 
-def save_generated_project(response, use_jsonify=False):
+def save_generated_project(response):
     parsed = json.loads(response)
     if parsed["category"] not in PROJECT_CATEGORIES:
         parsed["category"] = "other"

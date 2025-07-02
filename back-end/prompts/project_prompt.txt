@@ -6,7 +6,7 @@ Using the input below, return a JSON object with the following structure:
   "name": string,               // Concise project title
   "description": string,        // Brief project overview
   "category": string,           // Optional; suggest based on context
-  "tasks": [                    // 3–5 high-level tasks for this project
+  "tasks": [                    // 5-20 high-level tasks for this project
     {
       "name": string,
       "description": string,
