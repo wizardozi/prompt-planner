@@ -10,6 +10,7 @@ from storage import load_projects, save_projects
 from utils import create_project_id, create_task_id, create_subtask_id
 from openai import OpenAI
 import json
+from flask import jsonify
 
 
 
@@ -75,7 +76,7 @@ def save_generated_project(response):
                 name=sub_data["name"],
                 description=sub_data["description"],
                 estimate=sub_data.get("estimate", ""),
-                status="pending",
+                status="to-do",
                 task_id=task_id
             )
             task.subtasks.append(subtask)
@@ -86,7 +87,10 @@ def save_generated_project(response):
     projects = load_projects()
     projects.append(project.to_dict())
     save_projects(projects)
-    return "✅ Project saved!"
+    # return "✅ Project saved!"
+    # return project
+
+    return jsonify({"project": project.to_dict()})
 
 def ai_generate_task(prompt, project):
      pass

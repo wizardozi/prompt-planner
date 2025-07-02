@@ -20,15 +20,26 @@ function ProjectsList() {
           {projects.map((project) => (
             <li key={project.id}>
               <strong>{project.name}</strong>
+              <p>{project.description}</p>
+              <p>{project.category}</p>
               {project.tasks && (
                 <ul>
                   {project.tasks.map((task) => (
                     <li key={task.id}>
-                      {task.label}
+                      <strong>{task.name}</strong>
+                      <p>{task.description}</p>
+                      <p>Due: {task.due_by}</p>
+                      <p>Priority: {task.priority}</p>
+                      <p>Status: {task.status}</p>
                       {task.subtasks && (
                         <ul>
                           {task.subtasks?.map((subtask, index) => (
-                            <li key={index}>{subtask.label}</li>
+                            <li key={index}>
+                              <strong>{subtask.name}</strong>
+                              <p>{subtask.description}</p>
+                              <p>Estimate: {subtask.estimate} hrs</p>
+                              <p>Status: {subtask.status}</p>
+                            </li>
                           ))}
                         </ul>
                       )}
