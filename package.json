@@ -3,7 +3,7 @@
   "scripts": {
     "start": "cd front-end && npm start",
     "electron": "electron .",
-    "dev": "concurrently \"./back-end/.venv/bin/python3 back-end/server.py\" \"cd front-end && npm start\" \"wait-on http://localhost:3000 && electron .\""
+    "dev": "concurrently \"./back-end/.venv/bin/python3 ./back-end/server.py\" \"cd front-end && npm start\" \"wait-on http://localhost:3000 && electron .\""
   },
   "devDependencies": {
     "concurrently": "^9.2.0",
